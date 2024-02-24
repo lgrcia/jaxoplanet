@@ -20,7 +20,7 @@ from jaxoplanet.experimental.starry.ylm import Ylm
 class Map(eqx.Module):
     y: Optional[Ylm] = None
     """Ylm object representing the spherical harmonic expansion
-    of the map."""
+       of the map."""
     inc: Optional[float] = None
     """Inclination of the map in radians."""
     obl: Optional[float] = None
@@ -29,7 +29,7 @@ class Map(eqx.Module):
     """Tuple of limb darkening coefficients."""
     period: Optional[float] = None
     """Rotation period of the map in days (attribute subject
-    to change)"""
+       to change)"""
     amplitude: Optional[float] = None
     """Amplitude of the map, a quantity proportional to map luminosity."""
     normalize: Optional[bool] = None
@@ -69,21 +69,21 @@ class Map(eqx.Module):
         """Surface map object.
 
         Args:
-            y (Optional[Union[Ylm, float]], optional): Ylm object containing the
-            spherical harmonic expansion of the map. Defaults to None (a uniform map)
-            with amplitude 1.0.
+            y (Optional[Union[Ylm, float]], optional): :class:`~jaxoplanet.experimental.
+               starry.Ylm` object containing the spherical harmonic expansion of the map.
+               Defaults to None (a uniform map) with amplitude 1.0.
             inc (Optional[float], optional): inclination of the map. Defaults to 0.
             obl (Optional[float], optional): obliquity iof the map. Defaults to 0.
             u (Optional[tuple], optional): polynomial limb-darkening coefficients of
-            the map. Defaults to ().
+               the map. Defaults to ().
             period (Optional[float], optional): rotation period of the map. Defaults to
-            1e15.
+               1e15.
             amplitude (Optional[float], optional): amplitude of the map, this quantity is
-            proportional to the luminosity of the map and multiplies all flux-related
-            observables. Defaults to 1..
+               proportional to the luminosity of the map and multiplies all flux-related
+               observables. Defaults to 1..
             normalize (Optional[bool], optional): whether to normalize the coefficients
-            of the spherical harmonics. If None or True, Ylm is normalized and the
-            amplitude of the map is set to y[(0, 0)]. Defaults to None.
+               of the spherical harmonics. If None or True, :code:`Ylm` is normalized and the
+               amplitude of the map is set to :code:`y[(0, 0)]`. Defaults to None.
         """
 
         if y is None:
@@ -114,18 +114,22 @@ class Map(eqx.Module):
 
     @property
     def poly_basis(self):
+        """Polynomial basis function with signature :math:`(x,y,z,\\theta) \\rightarrow p^T`"""
         return jax.jit(poly_basis(self.deg))
 
     @property
     def udeg(self):
+        """Degree of the polynomial limb darkening."""
         return len(self.u)
 
     @property
     def ydeg(self):
+        """Degree of the spherical harmonic map."""
         return self.y.ell_max
 
     @property
     def deg(self):
+        """Total degree of the spherical harmonic map, including limb-darkening."""
         return self.ydeg + self.udeg
 
     def _intensity(self, x, y, z, theta=0.0):
@@ -177,9 +181,16 @@ class Map(eqx.Module):
 
         return self._intensity(x, y, z)
 
-    def flux(self, time):
-        theta = time * 2 * jnp.pi / self.period
+    def flux(self, theta: float):
+        """Flux of the map as a function of phase.
+
+        Args:
+            theta (float): rotation angle of the map.
+
+        Returns:
+            ArrayLike : flux
+        """
         return (
-            jnp.vectorize(partial(map_light_curve, self, 0.0, 2.0, 2.0, 2.0))(theta)
+            jnp.vectorize(partial(map_light_curve, self, None, None, None, None))(theta)
             * self.amplitude
         )
