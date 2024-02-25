@@ -17,12 +17,12 @@ def light_curve(system, time: ArrayLike):
 
     Args:
         system (orbits.keplerian.System): keplerian system containing bodies
-        (that must have defined radii)
+           (that must have defined radii)
         time (ArrayLike): time array
 
     Returns:
         ArrayLike: light curves of each body in the system, starting with the
-        central body, followed by the rest of the bodies.
+           central body, followed by the rest of the bodies.
     """
     xos, yos, zos = system.relative_position(time)
     theta = time * 2 * jnp.pi / system.central.map.period
