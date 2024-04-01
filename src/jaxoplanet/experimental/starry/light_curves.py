@@ -90,6 +90,7 @@ def map_light_curve(
     yo: float = None,
     zo: float = None,
     theta: float = 0.0,
+    order: int = 20,
 ):
     """Light curve of an occulted map.
 
@@ -122,7 +123,7 @@ def map_light_curve(
         b_rot = jnp.logical_or(jnp.greater_equal(b, 1.0 + r), jnp.less_equal(zo, 0.0))
         b_occ = jnp.logical_not(b_rot)
         theta_z = jnp.arctan2(xo, yo)
-        sT = solution_vector(map.deg)(b, r)
+        sT = solution_vector(map.deg, order=order)(b, r)
 
         # scipy.sparse.linalg.inv of a sparse matrix[[1]] is a non-sparse [[1]], hence
         # `from_scipy_sparse`` raises an error (case deg=0)
